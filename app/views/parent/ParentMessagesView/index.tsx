@@ -5,7 +5,7 @@ interface ParentMessagesViewProps {
 }
 
 export const ParentMessagesView = ({ setView }: ParentMessagesViewProps) => (
-  <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 p-6 pb-20">
+  <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 pt-20 px-6 pb-20">
     <div className="max-w-4xl mx-auto">
       <button
         onClick={() => setView('home')}

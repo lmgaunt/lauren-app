@@ -8,7 +8,7 @@ interface KidCelebrationViewProps {
 }
 
 export const KidCelebrationView = ({ completedMissions, setCompletedMissions, setView }: KidCelebrationViewProps) => (
-  <div className="min-h-screen bg-gradient-to-b from-yellow-100 via-pink-100 to-purple-100 p-6 pb-20 flex flex-col items-center justify-center">
+  <div className="min-h-screen bg-gradient-to-b from-yellow-100 via-pink-100 to-purple-100 pt-20 px-6 pb-20 flex flex-col items-center justify-center">
     <div className="text-center">
       <div className="text-8xl mb-6 animate-bounce">🎉</div>
       <h1 className="text-4xl font-bold text-purple-800 mb-4">AMAZING JOB!</h1>
