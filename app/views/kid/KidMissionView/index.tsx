@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { CharacterBuddy } from '@/app/components/CharacterBuddy';
 
 interface KidMissionViewProps {
@@ -10,8 +10,31 @@ interface KidMissionViewProps {
 }
 
 export const KidMissionView = ({ setView, stars, setStars }: KidMissionViewProps) => {
-  const [reps, setReps] = useState(0);
-  const totalReps = 10;
+  const EXERCISE_DURATION = 30; // 30 seconds
+  const [timeRemaining, setTimeRemaining] = useState(EXERCISE_DURATION);
+  const [isRunning, setIsRunning] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (isRunning && timeRemaining > 0) {
+      interval = setInterval(() => {
+        setTimeRemaining((prev) => {
+          if (prev <= 1) {
+            setIsRunning(false);
+            setIsCompleted(true);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [isRunning, timeRemaining]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-100 to-pink-50 p-6 pb-20">
@@ -31,17 +54,17 @@ export const KidMissionView = ({ setView, stars, setStars }: KidMissionViewProps
 
       <div className="bg-white rounded-3xl p-8 shadow-lg mb-6">
         <h2 className="text-2xl font-bold text-purple-800 mb-2">Morning Stretches</h2>
-        <p className="text-gray-600 mb-6">Let&apos;s do {totalReps} arm circles together!</p>
+        <p className="text-gray-600 mb-6">Let&apos;s do arm circles for {EXERCISE_DURATION} seconds!</p>
 
         <div className="mb-6">
           <div className="flex justify-between text-sm text-gray-600 mb-2">
-            <span>{reps} circles done</span>
-            <span>{totalReps - reps} to go!</span>
+            <span>Time Remaining</span>
+            <span>{timeRemaining}s</span>
           </div>
           <div className="w-full h-4 bg-gray-200 rounded-full overflow-hidden">
             <div
-              className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-500 rounded-full"
-              style={{ width: `${(reps / totalReps) * 100}%` }}
+              className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all duration-1000 rounded-full"
+              style={{ width: `${((EXERCISE_DURATION - timeRemaining) / EXERCISE_DURATION) * 100}%` }}
             ></div>
           </div>
         </div>
@@ -49,21 +72,46 @@ export const KidMissionView = ({ setView, stars, setStars }: KidMissionViewProps
         <div className="bg-gradient-to-br from-purple-100 to-pink-100 rounded-2xl p-12 mb-6 text-center">
           <div className="text-6xl mb-4">🤸</div>
           <p className="text-lg font-semibold text-gray-700">Make big circles with your arms!</p>
+
+          {/* Countdown Timer Display */}
+          <div className="mt-6">
+            <div className={`text-7xl font-bold ${isRunning ? 'text-purple-600 animate-pulse' : isCompleted ? 'text-green-600' : 'text-gray-400'}`}>
+              {timeRemaining}
+            </div>
+            <div className="text-lg text-gray-600 mt-2">
+              {isCompleted ? '🎉 Time\'s up!' : isRunning ? 'Keep going!' : 'Press Start to begin'}
+            </div>
+          </div>
         </div>
 
-        <button
-          onClick={() => {
-            if (reps < totalReps) {
-              setReps(reps + 1);
-            }
-          }}
-          className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-2xl font-bold py-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all"
-          disabled={reps >= totalReps}
-        >
-          {reps < totalReps ? `Tap when you finish one! (${reps}/${totalReps})` : '🎉 All done!'}
-        </button>
+        {!isRunning && !isCompleted && (
+          <button
+            onClick={() => setIsRunning(true)}
+            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-2xl font-bold py-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all"
+          >
+            Start Exercise! 🚀
+          </button>
+        )}
 
-        {reps >= totalReps && (
+        {isRunning && (
+          <button
+            onClick={() => setIsRunning(false)}
+            className="w-full bg-orange-500 text-white text-2xl font-bold py-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all"
+          >
+            Pause ⏸️
+          </button>
+        )}
+
+        {!isRunning && timeRemaining < EXERCISE_DURATION && timeRemaining > 0 && (
+          <button
+            onClick={() => setIsRunning(true)}
+            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-2xl font-bold py-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all"
+          >
+            Resume Exercise! ▶️
+          </button>
+        )}
+
+        {isCompleted && (
           <button
             onClick={() => {
               setView('celebration');
