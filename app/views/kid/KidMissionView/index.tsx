@@ -37,7 +37,7 @@ export const KidMissionView = ({ setView, stars, setStars }: KidMissionViewProps
   }, [isRunning, timeRemaining]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-purple-100 to-pink-50 p-6 pb-20">
+    <div className="min-h-screen bg-gradient-to-b from-purple-100 to-pink-50 pt-20 px-6 pb-20">
       <button
         onClick={() => setView('home')}
         className="text-purple-600 font-semibold mb-4"

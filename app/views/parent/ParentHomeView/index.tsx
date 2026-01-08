@@ -11,7 +11,7 @@ interface ParentHomeViewProps {
 }
 
 export const ParentHomeView = ({ streak, stars, missions, completedMissions, weeklyData, setView }: ParentHomeViewProps) => (
-  <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 p-6 pb-20">
+  <div className="min-h-screen bg-gradient-to-b from-purple-50 to-pink-50 pt-20 px-6 pb-20">
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">Alex&apos;s Progress</h1>

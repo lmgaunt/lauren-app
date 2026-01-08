@@ -11,7 +11,7 @@ interface KidHomeViewProps {
 }
 
 export const KidHomeView = ({ streak, stars, missions, completedMissions, setView }: KidHomeViewProps) => (
-  <div className="min-h-screen bg-gradient-to-b from-purple-100 via-pink-50 to-orange-50 p-6 pb-20">
+  <div className="min-h-screen bg-gradient-to-b from-purple-100 via-pink-50 to-orange-50 pt-20 px-6 pb-20">
     <div className="flex justify-between items-center mb-6">
       <div>
         <h1 className="text-3xl font-bold text-purple-800">Hi, Alex! 👋</h1>

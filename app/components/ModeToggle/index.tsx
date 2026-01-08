@@ -5,7 +5,7 @@ interface ModeToggleProps {
 }
 
 export const ModeToggle = ({ mode, setMode, setView }: ModeToggleProps) => (
-  <div className="fixed top-4 right-4 z-50 bg-white rounded-full shadow-lg p-1 flex gap-1">
+  <div className="fixed top-0 left-0 right-0 z-50 bg-white shadow-md p-2 flex gap-1 justify-center border-b border-gray-200">
     <button
       onClick={() => { setMode('kid'); setView('home'); }}
       className={`px-4 py-2 rounded-full font-semibold transition-all ${

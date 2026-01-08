@@ -8,7 +8,7 @@ interface ClinicianHomeViewProps {
 }
 
 export const ClinicianHomeView = ({ patients, setSelectedPatient, setView }: ClinicianHomeViewProps) => (
-  <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50 p-6 pb-20">
+  <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50 pt-20 px-6 pb-20">
     <div className="max-w-6xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
