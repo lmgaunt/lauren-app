@@ -29,13 +29,11 @@ export const KidHomeView = ({ streak, stars, missions, completedMissions, setVie
       </div>
     </div>
 
-    <div className="bg-white rounded-3xl p-8 shadow-lg mb-6 relative overflow-hidden">
-      <div className="absolute top-0 right-0 w-32 h-32 bg-purple-200 rounded-full blur-3xl opacity-50"></div>
-      <div className="absolute bottom-0 left-0 w-32 h-32 bg-pink-200 rounded-full blur-3xl opacity-50"></div>
+    <div className="mb-6">
       <CharacterBuddy />
-      <div className="mt-4 text-center relative z-10">
-        <p className="text-xl font-semibold text-gray-800">You&apos;re doing AMAZING!</p>
-        <p className="text-gray-600">Let&apos;s keep that streak going! 🎉</p>
+      <div className="mt-4 text-center">
+        <p className="text-xl font-semibold text-purple-800">You&apos;re doing AMAZING!</p>
+        <p className="text-purple-600">Let&apos;s keep that streak going! 🎉</p>
       </div>
     </div>
 
