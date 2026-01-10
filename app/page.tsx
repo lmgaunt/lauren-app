@@ -5,7 +5,7 @@ import { ModeToggle } from '@/app/components/ModeToggle';
 import { KidHomeView, KidMissionView, KidCelebrationView } from '@/app/views/kid';
 import { ParentHomeView, ParentExercisesView, ParentMessagesView, ParentSettingsView } from '@/app/views/parent';
 import { ClinicianHomeView, ClinicianPatientDetailView, ClinicianAssignExercisesView, ClinicianBillingView } from '@/app/views/clinician';
-import { Patient, Mission, WeeklyData } from '@/app/types';
+import { Patient, Mission, WeeklyData, MissionAdherence, AdherenceStatus } from '@/app/types';
 
 const TherapyApp = () => {
   const [mode, setMode] = useState('kid');
@@ -14,6 +14,14 @@ const TherapyApp = () => {
   const [completedMissions, setCompletedMissions] = useState([1, 2]);
   const [stars, setStars] = useState(47);
   const [streak] = useState(5);
+
+  // Adherence tracking for parent view
+  const [todayAdherence, setTodayAdherence] = useState<Record<number, AdherenceStatus>>({
+    1: 'done',
+    2: 'done',
+    3: 'pending',
+    4: 'pending',
+  });
 
   const patients: Patient[] = [
     { id: 1, name: 'Alex Martinez', age: 7, compliance: 85, lastActivity: '2 hours ago', streak: 5, alerts: 0, therapyType: 'PT, Speech' },
@@ -75,13 +83,13 @@ const TherapyApp = () => {
   ];
 
   const weeklyData: WeeklyData[] = [
-    { day: 'Mon', completed: 4 },
-    { day: 'Tue', completed: 3 },
-    { day: 'Wed', completed: 4 },
-    { day: 'Thu', completed: 4 },
-    { day: 'Fri', completed: 2 },
-    { day: 'Sat', completed: 0 },
-    { day: 'Sun', completed: 0 },
+    { day: 'Mon', completed: 4, attempted: 4 },
+    { day: 'Tue', completed: 2, attempted: 4 },
+    { day: 'Wed', completed: 3, attempted: 4 },
+    { day: 'Thu', completed: 3, attempted: 4 },
+    { day: 'Fri', completed: 1, attempted: 3 },
+    { day: 'Sat', completed: 0, attempted: 0 },
+    { day: 'Sun', completed: 0, attempted: 0 },
   ];
 
   return (
@@ -123,6 +131,8 @@ const TherapyApp = () => {
               missions={missions}
               completedMissions={completedMissions}
               weeklyData={weeklyData}
+              todayAdherence={todayAdherence}
+              setTodayAdherence={setTodayAdherence}
               setView={setView}
             />
           )}
@@ -130,6 +140,8 @@ const TherapyApp = () => {
             <ParentExercisesView
               missions={missions}
               completedMissions={completedMissions}
+              todayAdherence={todayAdherence}
+              setTodayAdherence={setTodayAdherence}
               setView={setView}
             />
           )}

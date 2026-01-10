@@ -25,4 +25,14 @@ export interface Mission {
 export interface WeeklyData {
   day: string;
   completed: number;
+  attempted?: number;
+}
+
+export type AdherenceStatus = 'done' | 'partial' | 'tried' | 'not_today' | 'pending';
+
+export interface MissionAdherence {
+  missionId: number;
+  status: AdherenceStatus;
+  date: string;
+  note?: string;
 }
