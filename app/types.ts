@@ -47,4 +47,7 @@ export interface ActivitySession {
   completedTimer: boolean;
   childReflectionChoice?: ReflectionChoice;
   flagNeedsSupport?: boolean;
+  barriers?: string[];
+  barrierOtherText?: string;
+  barrierLoggedAt?: number;
 }
