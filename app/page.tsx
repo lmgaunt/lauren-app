@@ -2,10 +2,10 @@
 
 import { useState } from 'react';
 import { ModeToggle } from '@/app/components/ModeToggle';
-import { KidHomeView, KidMissionView, KidCelebrationView } from '@/app/views/kid';
+import { KidHomeView, KidMissionView, KidCelebrationView, KidReflectionView } from '@/app/views/kid';
 import { ParentHomeView, ParentExercisesView, ParentMessagesView, ParentSettingsView } from '@/app/views/parent';
 import { ClinicianHomeView, ClinicianPatientDetailView, ClinicianAssignExercisesView, ClinicianBillingView } from '@/app/views/clinician';
-import { Patient, Mission, WeeklyData, MissionAdherence, AdherenceStatus } from '@/app/types';
+import { Patient, Mission, WeeklyData, MissionAdherence, AdherenceStatus, ActivitySession, ReflectionChoice } from '@/app/types';
 
 const TherapyApp = () => {
   const [mode, setMode] = useState('kid');
@@ -22,6 +22,57 @@ const TherapyApp = () => {
     3: 'pending',
     4: 'pending',
   });
+
+  // Current activity session tracking
+  const [currentSession, setCurrentSession] = useState<ActivitySession>({
+    activityId: 1, // Default to first mission
+    startedAt: Date.now(),
+    endedAt: 0,
+    durationSeconds: 0,
+    completedTimer: false,
+  });
+
+  // Handle child's reflection choice and map to parent adherence
+  const handleReflectionChoice = (choice: ReflectionChoice) => {
+    const activityId = currentSession.activityId;
+
+    // Map child reflection to parent adherence status
+    let status: AdherenceStatus;
+    let needsSupport = false;
+
+    switch (choice) {
+      case 'did_it':
+        status = 'done';
+        break;
+      case 'tried':
+        status = 'tried';
+        break;
+      case 'need_help':
+        status = 'tried';
+        needsSupport = true;
+        break;
+    }
+
+    // Update adherence status
+    setTodayAdherence({
+      ...todayAdherence,
+      [activityId]: status,
+    });
+
+    // Update session with reflection choice
+    setCurrentSession({
+      ...currentSession,
+      childReflectionChoice: choice,
+      flagNeedsSupport: needsSupport,
+    });
+
+    // Update stars based on participation
+    if (choice === 'did_it') {
+      setStars(stars + 5);
+    } else {
+      setStars(stars + 3); // Still reward for trying!
+    }
+  };
 
   const patients: Patient[] = [
     { id: 1, name: 'Alex Martinez', age: 7, compliance: 85, lastActivity: '2 hours ago', streak: 5, alerts: 0, therapyType: 'PT, Speech' },
@@ -118,6 +169,14 @@ const TherapyApp = () => {
               completedMissions={completedMissions}
               setCompletedMissions={setCompletedMissions}
               setView={setView}
+            />
+          )}
+          {view === 'reflection' && (
+            <KidReflectionView
+              setView={setView}
+              onReflectionChoice={handleReflectionChoice}
+              sessionDuration={currentSession.durationSeconds}
+              completedTimer={currentSession.completedTimer}
             />
           )}
         </>

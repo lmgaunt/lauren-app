@@ -14,6 +14,13 @@ export const KidMissionView = ({ setView, stars, setStars }: KidMissionViewProps
   const [timeRemaining, setTimeRemaining] = useState(EXERCISE_DURATION);
   const [isRunning, setIsRunning] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
+  const [sessionStartTime] = useState(Date.now());
+  const [sessionData, setSessionData] = useState({
+    startedAt: Date.now(),
+    endedAt: 0,
+    durationSeconds: 0,
+    completedTimer: false,
+  });
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -24,6 +31,13 @@ export const KidMissionView = ({ setView, stars, setStars }: KidMissionViewProps
           if (prev <= 1) {
             setIsRunning(false);
             setIsCompleted(true);
+            // Timer completed fully
+            setSessionData({
+              startedAt: sessionStartTime,
+              endedAt: Date.now(),
+              durationSeconds: EXERCISE_DURATION,
+              completedTimer: true,
+            });
             return 0;
           }
           return prev - 1;
@@ -34,7 +48,19 @@ export const KidMissionView = ({ setView, stars, setStars }: KidMissionViewProps
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [isRunning, timeRemaining]);
+  }, [isRunning, timeRemaining, sessionStartTime, EXERCISE_DURATION]);
+
+  const handleStopEarly = () => {
+    const elapsed = EXERCISE_DURATION - timeRemaining;
+    setSessionData({
+      startedAt: sessionStartTime,
+      endedAt: Date.now(),
+      durationSeconds: elapsed,
+      completedTimer: false,
+    });
+    setIsCompleted(true);
+    setIsRunning(false);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-purple-100 to-pink-50 pt-20 px-6 pb-20">
@@ -84,7 +110,7 @@ export const KidMissionView = ({ setView, stars, setStars }: KidMissionViewProps
           </div>
         </div>
 
-        {!isRunning && !isCompleted && (
+        {!isRunning && !isCompleted && timeRemaining === EXERCISE_DURATION && (
           <button
             onClick={() => setIsRunning(true)}
             className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-2xl font-bold py-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all"
@@ -102,24 +128,29 @@ export const KidMissionView = ({ setView, stars, setStars }: KidMissionViewProps
           </button>
         )}
 
-        {!isRunning && timeRemaining < EXERCISE_DURATION && timeRemaining > 0 && (
-          <button
-            onClick={() => setIsRunning(true)}
-            className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-2xl font-bold py-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all"
-          >
-            Resume Exercise! ▶️
-          </button>
+        {!isRunning && timeRemaining < EXERCISE_DURATION && timeRemaining > 0 && !isCompleted && (
+          <div className="space-y-3">
+            <button
+              onClick={() => setIsRunning(true)}
+              className="w-full bg-gradient-to-r from-purple-500 to-pink-500 text-white text-2xl font-bold py-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all"
+            >
+              Resume Exercise! ▶️
+            </button>
+            <button
+              onClick={handleStopEarly}
+              className="w-full bg-blue-500 text-white text-xl font-bold py-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all"
+            >
+              All done for now ✨
+            </button>
+          </div>
         )}
 
         {isCompleted && (
           <button
-            onClick={() => {
-              setView('celebration');
-              setStars(stars + 5);
-            }}
-            className="w-full mt-4 bg-green-500 text-white text-xl font-bold py-6 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all"
+            onClick={() => setView('reflection')}
+            className="w-full mt-4 bg-gradient-to-r from-green-500 to-blue-500 text-white text-2xl font-bold py-8 rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 transition-all"
           >
-            Complete Quest! ✨
+            All done for now ✨
           </button>
         )}
       </div>
