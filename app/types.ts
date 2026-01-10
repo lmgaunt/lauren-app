@@ -36,3 +36,15 @@ export interface MissionAdherence {
   date: string;
   note?: string;
 }
+
+export type ReflectionChoice = 'did_it' | 'tried' | 'need_help';
+
+export interface ActivitySession {
+  activityId: number;
+  startedAt: number;
+  endedAt: number;
+  durationSeconds: number;
+  completedTimer: boolean;
+  childReflectionChoice?: ReflectionChoice;
+  flagNeedsSupport?: boolean;
+}
