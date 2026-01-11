@@ -1,11 +1,15 @@
-import { CheckCircle, Clock, Calendar, Sparkles, ThumbsUp, Zap } from 'lucide-react';
-import { Mission, AdherenceStatus } from '@/app/types';
+import { useState } from 'react';
+import { CheckCircle, Clock, Calendar, Sparkles, ThumbsUp, Zap, Tag } from 'lucide-react';
+import { Mission, AdherenceStatus, ActivitySession } from '@/app/types';
+import { BarrierTagging } from '@/app/components/BarrierTagging';
 
 interface ParentExercisesViewProps {
   missions: Mission[];
   completedMissions: number[];
   todayAdherence: Record<number, AdherenceStatus>;
   setTodayAdherence: (adherence: Record<number, AdherenceStatus>) => void;
+  sessionData: Record<number, ActivitySession>;
+  updateSessionBarriers: (missionId: number, barriers: string[], otherText?: string) => void;
   setView: (view: string) => void;
 }
 
@@ -17,12 +21,34 @@ const statusConfig = {
   pending: { label: 'Pending', color: 'bg-yellow-50 text-yellow-700 border-yellow-200', icon: Zap, emoji: '⏳' },
 };
 
-export const ParentExercisesView = ({ missions, completedMissions, todayAdherence, setTodayAdherence, setView }: ParentExercisesViewProps) => {
+export const ParentExercisesView = ({ missions, completedMissions, todayAdherence, setTodayAdherence, sessionData, updateSessionBarriers, setView }: ParentExercisesViewProps) => {
+  const [showBarrierModal, setShowBarrierModal] = useState(false);
+  const [currentBarrierMissionId, setCurrentBarrierMissionId] = useState<number | null>(null);
+  const [preselectedBarriers, setPreselectedBarriers] = useState<string[]>([]);
+
   const handleStatusChange = (missionId: number, status: AdherenceStatus) => {
     setTodayAdherence({
       ...todayAdherence,
       [missionId]: status,
     });
+
+    // Trigger barrier tagging for non-done statuses
+    if (status !== 'done' && status !== 'pending') {
+      const session = sessionData[missionId];
+      const needsHelpPreselect = session?.childReflectionChoice === 'need_help' ? ['didnt_understand'] : [];
+
+      setCurrentBarrierMissionId(missionId);
+      setPreselectedBarriers(needsHelpPreselect);
+      setShowBarrierModal(true);
+    }
+  };
+
+  const handleBarrierSave = (barriers: string[], otherText?: string) => {
+    if (currentBarrierMissionId !== null) {
+      updateSessionBarriers(currentBarrierMissionId, barriers, otherText);
+    }
+    setShowBarrierModal(false);
+    setCurrentBarrierMissionId(null);
   };
 
   const getAttemptCount = () => {
@@ -69,6 +95,8 @@ export const ParentExercisesView = ({ missions, completedMissions, todayAdherenc
             const currentStatus = todayAdherence[mission.id] || 'pending';
             const config = statusConfig[currentStatus];
             const StatusIcon = config.icon;
+            const session = sessionData[mission.id];
+            const hasBarriers = session?.barriers && session.barriers.length > 0;
 
             return (
               <div key={mission.id} className="bg-white rounded-2xl p-6 shadow-md">
@@ -87,6 +115,38 @@ export const ParentExercisesView = ({ missions, completedMissions, todayAdherenc
                         {config.label}
                       </div>
                     </div>
+
+                    {session?.childReflectionChoice && (
+                      <div className="mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm text-blue-800">
+                          <span className="font-semibold">Child's reflection:</span>{' '}
+                          {session.childReflectionChoice === 'did_it' && '✨ I did it'}
+                          {session.childReflectionChoice === 'tried' && '👍 I tried'}
+                          {session.childReflectionChoice === 'need_help' && '💙 I need help next time'}
+                        </p>
+                      </div>
+                    )}
+
+                    {hasBarriers && (
+                      <div className="mb-3 p-3 bg-orange-50 border border-orange-200 rounded-lg">
+                        <div className="flex items-start gap-2">
+                          <Tag className="w-4 h-4 text-orange-600 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1">
+                            <p className="text-sm font-semibold text-orange-800 mb-1">Barriers noted:</p>
+                            <div className="flex flex-wrap gap-1">
+                              {session.barriers!.map((barrier, i) => (
+                                <span key={i} className="text-xs bg-white px-2 py-1 rounded-full text-orange-700 border border-orange-300">
+                                  {barrier.replace('_', ' ')}
+                                </span>
+                              ))}
+                            </div>
+                            {session.barrierOtherText && (
+                              <p className="text-xs text-orange-700 mt-1 italic">&quot;{session.barrierOtherText}&quot;</p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
 
                     <div className="space-y-3 mt-4">
                       <div className="bg-purple-50 rounded-xl p-4">
@@ -141,6 +201,24 @@ export const ParentExercisesView = ({ missions, completedMissions, todayAdherenc
                             })}
                         </div>
 
+                        {/* Add/Edit Barriers Button */}
+                        {currentStatus !== 'done' && currentStatus !== 'pending' && (
+                          <button
+                            onClick={() => {
+                              const needsHelpPreselect = session?.childReflectionChoice === 'need_help' ? ['didnt_understand'] : [];
+                              setCurrentBarrierMissionId(mission.id);
+                              setPreselectedBarriers(session?.barriers || needsHelpPreselect);
+                              setShowBarrierModal(true);
+                            }}
+                            className="w-full mt-3 flex items-center justify-center gap-2 py-2 px-4 bg-gray-50 hover:bg-gray-100 border-2 border-gray-200 rounded-xl transition-colors"
+                          >
+                            <Tag className="w-4 h-4 text-gray-600" />
+                            <span className="text-sm font-semibold text-gray-700">
+                              {hasBarriers ? 'Edit barriers' : 'Add barriers (optional)'}
+                            </span>
+                          </button>
+                        )}
+
                         {/* Celebration messages for attempts */}
                         {currentStatus === 'tried' && (
                           <div className="mt-3 bg-purple-50 border-2 border-purple-200 rounded-lg p-3 text-center">
@@ -166,6 +244,16 @@ export const ParentExercisesView = ({ missions, completedMissions, todayAdherenc
           })}
         </div>
       </div>
+
+      <BarrierTagging
+        isOpen={showBarrierModal}
+        onClose={() => {
+          setShowBarrierModal(false);
+          setCurrentBarrierMissionId(null);
+        }}
+        onSave={handleBarrierSave}
+        preselectedBarriers={preselectedBarriers}
+      />
     </div>
   );
 };

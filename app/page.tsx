@@ -32,6 +32,14 @@ const TherapyApp = () => {
     completedTimer: false,
   });
 
+  // Session data for all activities (for parent barrier tracking)
+  const [sessionData, setSessionData] = useState<Record<number, ActivitySession>>({
+    1: { activityId: 1, startedAt: Date.now(), endedAt: Date.now(), durationSeconds: 30, completedTimer: true, childReflectionChoice: 'did_it' },
+    2: { activityId: 2, startedAt: Date.now(), endedAt: Date.now(), durationSeconds: 25, completedTimer: false, childReflectionChoice: 'did_it' },
+    3: { activityId: 3, startedAt: 0, endedAt: 0, durationSeconds: 0, completedTimer: false },
+    4: { activityId: 4, startedAt: 0, endedAt: 0, durationSeconds: 0, completedTimer: false },
+  });
+
   // Handle child's reflection choice and map to parent adherence
   const handleReflectionChoice = (choice: ReflectionChoice) => {
     const activityId = currentSession.activityId;
@@ -60,10 +68,17 @@ const TherapyApp = () => {
     });
 
     // Update session with reflection choice
-    setCurrentSession({
+    const updatedSession = {
       ...currentSession,
       childReflectionChoice: choice,
       flagNeedsSupport: needsSupport,
+    };
+    setCurrentSession(updatedSession);
+
+    // Also update sessionData
+    setSessionData({
+      ...sessionData,
+      [activityId]: updatedSession,
     });
 
     // Update stars based on participation
@@ -72,6 +87,19 @@ const TherapyApp = () => {
     } else {
       setStars(stars + 3); // Still reward for trying!
     }
+  };
+
+  // Update session barriers (parent-only)
+  const updateSessionBarriers = (missionId: number, barriers: string[], otherText?: string) => {
+    setSessionData({
+      ...sessionData,
+      [missionId]: {
+        ...sessionData[missionId],
+        barriers,
+        barrierOtherText: otherText,
+        barrierLoggedAt: Date.now(),
+      },
+    });
   };
 
   const patients: Patient[] = [
@@ -201,6 +229,8 @@ const TherapyApp = () => {
               completedMissions={completedMissions}
               todayAdherence={todayAdherence}
               setTodayAdherence={setTodayAdherence}
+              sessionData={sessionData}
+              updateSessionBarriers={updateSessionBarriers}
               setView={setView}
             />
           )}
