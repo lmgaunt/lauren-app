@@ -1,19 +1,32 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { ModeToggle } from '@/app/components/ModeToggle';
 import { KidHomeView, KidMissionView, KidCelebrationView, KidReflectionView } from '@/app/views/kid';
 import { ParentHomeView, ParentExercisesView, ParentMessagesView, ParentSettingsView } from '@/app/views/parent';
 import { ClinicianHomeView, ClinicianPatientDetailView, ClinicianAssignExercisesView, ClinicianBillingView } from '@/app/views/clinician';
 import { Patient, Mission, WeeklyData, MissionAdherence, AdherenceStatus, ActivitySession, ReflectionChoice } from '@/app/types';
+import { planTemplates } from '@/app/data/planTemplates';
+import { convertTemplateToMissions } from '@/app/utils/planTemplateUtils';
 
 const TherapyApp = () => {
   const [mode, setMode] = useState('kid');
   const [view, setView] = useState('home');
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null);
+  const [selectedTemplateId, setSelectedTemplateId] = useState(planTemplates[0].id); // Default to first template
+  const [currentMissionId, setCurrentMissionId] = useState<number>(1); // Track which mission is active
   const [completedMissions, setCompletedMissions] = useState([1, 2]);
   const [stars, setStars] = useState(47);
   const [streak] = useState(5);
+
+  // Generate missions from selected template
+  const missions = useMemo(() => {
+    const template = planTemplates.find(t => t.id === selectedTemplateId);
+    return template ? convertTemplateToMissions(template) : [];
+  }, [selectedTemplateId]);
+
+  // Get current mission
+  const currentMission = missions.find(m => m.id === currentMissionId) || missions[0];
 
   // Adherence tracking for parent view
   const [todayAdherence, setTodayAdherence] = useState<Record<number, AdherenceStatus>>({
@@ -110,57 +123,6 @@ const TherapyApp = () => {
     { id: 5, name: 'Noah Brown', age: 8, compliance: 95, lastActivity: '30 min ago', streak: 8, alerts: 0, therapyType: 'PT' },
   ];
 
-  const missions: Mission[] = [
-    {
-      id: 1,
-      title: 'Morning Stretches',
-      time: '5 min',
-      type: 'Physical Therapy',
-      icon: '🤸',
-      color: 'bg-purple-500',
-      description: 'Gentle arm circles and shoulder rolls to improve range of motion and reduce stiffness.',
-      instructions: '10 arm circles forward, 10 backward. Take breaks as needed. Focus on smooth, controlled movements.',
-      clinicianNote: 'Prescribed by Dr. Sarah Chen, PT',
-      frequency: 'Daily, morning'
-    },
-    {
-      id: 2,
-      title: 'Speech Practice',
-      time: '10 min',
-      type: 'Speech Therapy',
-      icon: '🗣️',
-      color: 'bg-pink-500',
-      description: 'Articulation exercises focusing on /r/ and /s/ sounds with visual prompts.',
-      instructions: 'Practice 10 words with target sounds. Use mirror for visual feedback. Celebrate effort, not perfection!',
-      clinicianNote: 'Prescribed by Jamie Rodriguez, SLP',
-      frequency: 'Daily, anytime'
-    },
-    {
-      id: 3,
-      title: 'Balance Game',
-      time: '8 min',
-      type: 'Physical Therapy',
-      icon: '⚖️',
-      color: 'bg-purple-500',
-      description: 'Standing balance activities to strengthen core and improve stability.',
-      instructions: 'Stand on one foot for 10 seconds, switch feet. Use wall for support if needed. 5 reps each side.',
-      clinicianNote: 'Prescribed by Dr. Sarah Chen, PT',
-      frequency: '3x per week'
-    },
-    {
-      id: 4,
-      title: 'Story Time',
-      time: '15 min',
-      type: 'Speech Therapy',
-      icon: '📖',
-      color: 'bg-pink-500',
-      description: 'Interactive reading to build vocabulary and conversational skills.',
-      instructions: 'Read together, asking "who, what, where" questions. Let your child retell parts of the story.',
-      clinicianNote: 'Prescribed by Jamie Rodriguez, SLP',
-      frequency: 'Daily, evening'
-    },
-  ];
-
   const weeklyData: WeeklyData[] = [
     { day: 'Mon', completed: 4, attempted: 4 },
     { day: 'Tue', completed: 2, attempted: 4 },
@@ -183,6 +145,7 @@ const TherapyApp = () => {
               missions={missions}
               completedMissions={completedMissions}
               setView={setView}
+              onMissionSelect={setCurrentMissionId}
             />
           )}
           {view === 'mission' && (
@@ -190,6 +153,7 @@ const TherapyApp = () => {
               setView={setView}
               stars={stars}
               setStars={setStars}
+              mission={currentMission}
             />
           )}
           {view === 'celebration' && (
@@ -221,6 +185,9 @@ const TherapyApp = () => {
               todayAdherence={todayAdherence}
               setTodayAdherence={setTodayAdherence}
               setView={setView}
+              templates={planTemplates}
+              selectedTemplateId={selectedTemplateId}
+              onTemplateChange={setSelectedTemplateId}
             />
           )}
           {view === 'exercises' && (

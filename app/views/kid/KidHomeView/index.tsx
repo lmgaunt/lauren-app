@@ -8,9 +8,10 @@ interface KidHomeViewProps {
   missions: Mission[];
   completedMissions: number[];
   setView: (view: string) => void;
+  onMissionSelect?: (missionId: number) => void;
 }
 
-export const KidHomeView = ({ streak, stars, missions, completedMissions, setView }: KidHomeViewProps) => (
+export const KidHomeView = ({ streak, stars, missions, completedMissions, setView, onMissionSelect }: KidHomeViewProps) => (
   <div className="min-h-screen bg-gradient-to-b from-purple-100 via-pink-50 to-orange-50 pt-20 px-6 pb-20">
     <div className="flex justify-between items-center mb-6">
       <div>
@@ -46,7 +47,10 @@ export const KidHomeView = ({ streak, stars, missions, completedMissions, setVie
       {missions.map((mission) => (
         <button
           key={mission.id}
-          onClick={() => setView('mission')}
+          onClick={() => {
+            onMissionSelect?.(mission.id);
+            setView('mission');
+          }}
           className="w-full bg-white rounded-2xl p-5 shadow-md hover:shadow-xl transition-all transform hover:scale-105 active:scale-95"
         >
           <div className="flex items-center gap-4">

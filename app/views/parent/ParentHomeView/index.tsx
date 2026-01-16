@@ -1,5 +1,7 @@
 import { Flame, CheckCircle, Star, BarChart3, Calendar, Clock, MessageSquare, Settings, ChevronRight, Sparkles } from 'lucide-react';
 import { Mission, WeeklyData, AdherenceStatus } from '@/app/types';
+import { PlanTemplate } from '@/app/data/planTemplates';
+import { TemplateSelector } from '@/app/components/TemplateSelector';
 
 interface ParentHomeViewProps {
   streak: number;
@@ -10,9 +12,12 @@ interface ParentHomeViewProps {
   todayAdherence: Record<number, AdherenceStatus>;
   setTodayAdherence: (adherence: Record<number, AdherenceStatus>) => void;
   setView: (view: string) => void;
+  templates: PlanTemplate[];
+  selectedTemplateId: string;
+  onTemplateChange: (templateId: string) => void;
 }
 
-export const ParentHomeView = ({ streak, stars, missions, completedMissions, weeklyData, todayAdherence, setTodayAdherence, setView }: ParentHomeViewProps) => {
+export const ParentHomeView = ({ streak, stars, missions, completedMissions, weeklyData, todayAdherence, setTodayAdherence, setView, templates, selectedTemplateId, onTemplateChange }: ParentHomeViewProps) => {
   const getAttemptCount = () => {
     return Object.values(todayAdherence).filter(
       status => status === 'done' || status === 'partial' || status === 'tried'
@@ -34,6 +39,12 @@ export const ParentHomeView = ({ streak, stars, missions, completedMissions, wee
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Alex&apos;s Progress</h1>
           <p className="text-gray-600">Every attempt counts! Here&apos;s how this week is going.</p>
         </div>
+
+        <TemplateSelector
+          templates={templates}
+          selectedTemplateId={selectedTemplateId}
+          onTemplateChange={onTemplateChange}
+        />
 
         <div className="grid grid-cols-3 gap-4 mb-6">
           <div className="bg-white rounded-2xl p-6 shadow-md">

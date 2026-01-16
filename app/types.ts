@@ -20,6 +20,8 @@ export interface Mission {
   instructions: string;
   clinicianNote: string;
   frequency: string;
+  durationSec?: number; // Duration for countdown timer
+  templateActivityId?: string; // Reference to plan template activity
 }
 
 export interface WeeklyData {
